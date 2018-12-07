@@ -73,6 +73,15 @@ setup_tls() {
   fi
 }
 
+setup_aws_profile() {
+  aws_access_key_id=$(jq -r '.source.aws_access_key_id // ""' < $1)
+  aws_region=$(jq -r '.source.aws_region // ""' < $1)
+  aws_secret_access_key=$(jq -r '.source.aws_secret_access_key // ""' < $1)
+  export AWS_DEFAULT_REGION=$aws_region
+  export AWS_ACCESS_KEY_ID=$aws_access_key_id
+  export AWS_SECRET_ACCESS_KEY=$aws_secret_access_key
+}
+
 setup_helm() {
   init_server=$(jq -r '.source.helm_init_server // "false"' < $1)
   tiller_namespace=$(jq -r '.source.tiller_namespace // "kube-system"' < $1)
@@ -151,6 +160,7 @@ setup_repos() {
 setup_resource() {
   echo "Initializing kubectl..."
   setup_kubernetes $1 $2
+  setup_aws_profile $1
   echo "Initializing helm..."
   setup_tls $1
   setup_helm $1
